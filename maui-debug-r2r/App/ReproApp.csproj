@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net11.0-ios</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+
+    <!--
+      Force the CoreCLR + crossgen2 ReadyToRun path on the iOS simulator (the same path the
+      MAUI Core.DeviceTests app takes). This is what invokes the macios _SelectR2RAssemblies /
+      composite crossgen2 compile that drops project-referenced (no-PackageId) assemblies.
+        - UseMonoRuntime=false   -> CoreCLR instead of the Mono interpreter
+        - PublishReadyToRun=true -> emit ReadyToRun images (crossgen2)
+        - MtouchLink=Full        -> full managed linker/trim (Debug too); the bug needs full link
+      FilterReadyToRunAssemblies defaults to true for non-Release, enabling the user-assembly
+      exclusion that drops Repro.Base from the composite.
+    -->
+    <UseMonoRuntime>false</UseMonoRuntime>
+    <PublishReadyToRun>true</PublishReadyToRun>
+
+    <!--
+      Leave MtouchLink at the macios DEFAULT for CoreCLR + simulator, which is None (no trimming).
+      That is exactly what the MAUI device test uses, and it means Repro.Impl reaches crossgen2
+      with its [IsTrimmable] attribute and ThingImpl->IThing MethodImpl intact. Repro.Base has no
+      PackageId so _SelectR2RAssemblies excludes it from the composite and it is not handed to
+      crossgen2, which then fails to resolve it while visibility-rooting Repro.Impl.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- NuGet package (HAS NuGetPackageId, [IsTrimmable] via source) -> stays in the composite -->
+    <PackageReference Include="Repro.Impl" Version="1.0.0" />
+    <!-- Normal project reference (NO NuGetPackageId), published but excluded from the R2R composite. -->
+    <ProjectReference Include="..\Base\Base.csproj" />
+  </ItemGroup>
+</Project>

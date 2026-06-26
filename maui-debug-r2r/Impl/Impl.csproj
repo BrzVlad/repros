@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    "Impl" library. It is consumed by the app as a NuGet PACKAGE (PackageReference),
+    so its output assembly HAS a NuGetPackageId. _SelectR2RAssemblies therefore keeps
+    it INSIDE the crossgen2 ReadyToRun composite. Because ThingImpl explicitly
+    implements Repro.Base.IThing, crossgen2 must load Repro.Base while compiling this
+    assembly -> "Failed to load assembly 'Repro.Base'" once Base has been excluded/trimmed.
+
+    The Base project reference is private (PrivateAssets=all) and dependencies are
+    suppressed when packing, so the produced package has NO dependency on Repro.Base:
+    the app supplies Repro.Base itself via a project reference (no PackageId).
+  -->
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Repro.Impl</AssemblyName>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Repro.Impl</PackageId>
+    <Version>1.0.0</Version>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Base\Base.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

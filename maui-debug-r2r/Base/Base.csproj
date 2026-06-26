@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    "Base" library. It is consumed by the app via a PROJECT REFERENCE, so its output
+    assembly has NO NuGetPackageId. The macios workload target _SelectR2RAssemblies
+    (Microsoft.Sdk.R2R.targets) classifies any assembly without a NuGetPackageId as a
+    "user assembly" and EXCLUDES it from the crossgen2 ReadyToRun composite. Under full
+    link it is then trimmed out of the app, so crossgen2 cannot resolve it.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Repro.Base</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>
